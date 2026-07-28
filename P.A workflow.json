@@ -1,0 +1,372 @@
+{
+  "name": "P.A workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are the main AI Executive Assistant. You are the \norchestrator — you do not perform tasks yourself, you \nroute every request to the correct tool below.\n\nYou have 6 tools:\n\n1. Calendar tool\nUse when the user wants to schedule, book, check, or \nreschedule a meeting or event.\nExample triggers: \"book a meeting\", \"what's on my \ncalendar\", \"am I free tomorrow at 3pm\"\n\n2. Gmail tool\nUse when the user wants to check, read, reply to, or \nsend emails.\nExample triggers: \"check my inbox\", \"reply to John's \nemail\", \"send an email to...\"\n\n3. Google task tool\nUse when the user wants to create, view, or delete tasks.\nExample triggers: \"add a task\", \"what's on my to-do \nlist\", \"remove that task\"\n\n4. Research tool\nUse when the user wants information, research or a \nsummary on any topic.\nExample triggers: \"research...\", \"look up...\", \n\"tell me about...\", \"what's the latest on...\"\n\n5. Get Contact Info (Google Sheet)\nUse when the user wants to find a contact's details — \nemail, phone, or other info — looked up from the \ncontacts sheet.\nExample triggers: \"what's John's email\", \"find \ncontact info for...\", \"do we have a number for...\"\n\n6. (No separate report tool — see DAILY BRIEFING below)\n\nDAILY BRIEFING — SPECIAL INSTRUCTION:\nWhen the user asks for their daily briefing, daily \nreport, morning summary, or \"what's on today,\" you \nmust do the following:\n\n1. Call the Calendar tool and ask it to get today's \n   meetings/events\n2. Call the Gmail tool and ask it to get unread messages\n3. Call the Google task tool and ask it to get open tasks\n4. Do NOT call the Research tool for this — it is not \n   part of the daily briefing\n5. Wait for all 3 responses, then compile them into \n   one clean report using this format:\n\n📅 MEETINGS TODAY\n[from Calendar tool, or \"No meetings today\"]\n\n✅ OPEN TASKS\n[from Google task tool, or \"No open tasks\"]\n\n📬 UNREAD EMAILS\n[from Gmail tool, or \"No unread emails\"]\n\n⚡ PRIORITY FOR TODAY\n[one sentence summarizing what matters most based \non the above]\n\nGENERAL RULES:\n- Always pick the correct tool — never guess or \n  answer from memory when a tool can get real data.\n- For emails, never send or reply without the user \n  confirming the content first.\n- If a request needs info you don't have (like an \n  email address), use Get Contact Info first.\n- Keep all responses short and clear. Never return \n  raw JSON or tool_call_results to the user — always \n  format the answer as clean readable text.\n- If a detail is missing for a task (date, time, \n  recipient, etc), ask one short clarifying question \n  before calling a tool.\n- Remember context from earlier in the conversation.\n\nYou must always use a tool to get real information. \nNever fabricate calendar events, tasks, emails, or \nresearch findings."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        112,
+        0
+      ],
+      "id": "a1586bbf-5375-45ba-9627-e4e327e02c64",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -80,
+        224
+      ],
+      "id": "2af1c91b-043c-425f-8e59-bbd597e223ef",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "description": "Use this when trying to perform any action on Google calendar  or get daily brief/report",
+        "workflowId": {
+          "__rl": true,
+          "value": "G8O6gUMlXS5uoLKc",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/G8O6gUMlXS5uoLKc",
+          "cachedResultName": "Cal agent sub-workflow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [
+            ""
+          ],
+          "schema": [
+            {
+              "id": "",
+              "displayName": "",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        48,
+        224
+      ],
+      "id": "0c8e055a-e611-4d2a-a9b6-89fd05bb8054",
+      "name": "Calendar tool"
+    },
+    {
+      "parameters": {
+        "description": "Use this when trying to perform any action on Gmail or get daily brief/report",
+        "workflowId": {
+          "__rl": true,
+          "value": "q5iZNojYsUucVXfZ",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/q5iZNojYsUucVXfZ",
+          "cachedResultName": "Gmail agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        176,
+        224
+      ],
+      "id": "cf9ef4d3-93c4-48f2-bf8e-6e9ceddc2e43",
+      "name": "Gmail tool"
+    },
+    {
+      "parameters": {
+        "description": "Use this when trying to perform any action on Google calendar  or get daily brief/report",
+        "workflowId": {
+          "__rl": true,
+          "value": "VU79aAUoHAmsir1S",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/VU79aAUoHAmsir1S",
+          "cachedResultName": "Google task sub-workflow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        304,
+        224
+      ],
+      "id": "bc01c038-d648-41cc-819a-36323ce300c7",
+      "name": "Google task tool"
+    },
+    {
+      "parameters": {
+        "description": "Use this when trying to make any research",
+        "workflowId": {
+          "__rl": true,
+          "value": "mvF9l8RUJeIdOJ2t",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/mvF9l8RUJeIdOJ2t",
+          "cachedResultName": "Research sub-workflow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        432,
+        224
+      ],
+      "id": "97888bed-09fd-47d3-8078-53db6242b682",
+      "name": "Research tool"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1JIB4R6WeTdC1qsCopsZoDEBtNfATr_wfQ6QV3ZRbsto",
+          "mode": "list",
+          "cachedResultName": "Contact info",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JIB4R6WeTdC1qsCopsZoDEBtNfATr_wfQ6QV3ZRbsto/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JIB4R6WeTdC1qsCopsZoDEBtNfATr_wfQ6QV3ZRbsto/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        224
+      ],
+      "id": "b05c184f-613c-4d01-8aa5-d493d6a55dcd",
+      "name": "Get Contact Info",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Cc6dYIzpEL9NJgFI",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        224
+      ],
+      "id": "9c4e1ad5-10ce-48ab-bc75-ab28202a1f9f",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "18kt4Jcz73BMP9Dc",
+          "name": "Groq account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -432,
+        0
+      ],
+      "id": "b0ec5ec0-94d3-4828-8aa6-92085607bc4f",
+      "name": "Telegram Trigger",
+      "webhookId": "a96cd449-55e5-474b-8976-23a0ae4bc7e9",
+      "credentials": {
+        "telegramApi": {
+          "id": "VRWw5b43qZR5mteZ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "7317054288",
+        "text": "={{ $json.output}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "2527d3d1-585b-4ca0-bfb1-b0b7ae003952",
+      "name": "Send a text message",
+      "webhookId": "ab993cf1-25a8-449d-9355-bd6d64bed405",
+      "credentials": {
+        "telegramApi": {
+          "id": "VRWw5b43qZR5mteZ",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google task tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Contact Info": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "36ee3103-a9df-48a5-80cc-58b3fd3e4d78",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "39d4e714e6dae6666679f55463a27bf970d9bb35682c08004027a37a0b09b0d6"
+  },
+  "nodeGroups": [],
+  "id": "rDrHiqbclfAvqJ3H",
+  "tags": []
+}
