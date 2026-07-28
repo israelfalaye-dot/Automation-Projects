@@ -1,0 +1,204 @@
+{
+  "name": "Research sub-workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "toolDescription": "Searches the web for a given query. Input: a search query string.",
+        "url": "={{ $fromAI('URL', 'the URL for the research you want to make') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        592,
+        448
+      ],
+      "id": "3bd08aee-111f-42b9-a034-4417c0ce187c",
+      "name": "Web research "
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        224
+      ],
+      "id": "a7bb6d3c-7721-41cc-acfa-11d4e76af9d9",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "You must use a tool to get real information before \nresponding. Never answer from memory alone.\n\nYou are a research assistant. You have 3 tools:\n\n1. Wikipedia — use for general background, definitions, \nor well-established facts about people, places, \ncompanies or concepts.\n\n2. Web research — use for current events, \nspecific data, or anything Wikipedia wouldn't cover \nwell. This is your default tool for most research \nrequests. Write a URL to make a research before using\n\n3. Hacker News — use only when the user asks about \ntech industry trends/news, startup news, or developer \ncommunity discussion specifically.\n\nRULES:\n- Pick the most relevant tool first — don't call all \n  three for every request.\n- For broad or current topics, use Web research. For \n  background facts, use Wikipedia.\n- Synthesize findings into a clear summary: 3-5 key \n  points, under 300 words.\n- Never make up information not found in your tool \n  results.\n- Always mention which source(s) you used."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        592,
+        224
+      ],
+      "id": "aa3fe5f8-826e-41ac-931c-cbe3fdd9ca04",
+      "name": "Research Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        720,
+        448
+      ],
+      "id": "2bb2bb7e-81e4-42dd-885a-1592072d65e0",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "resource": "all",
+        "limit": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Limit', ``, 'number') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.hackerNewsTool",
+      "typeVersion": 1,
+      "position": [
+        848,
+        448
+      ],
+      "id": "0d1a91dc-8b70-4041-b9f3-22cb0c16575f",
+      "name": "Hacker News"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "17d2da80-1570-4c6d-a878-6731c049da30",
+              "name": "Status",
+              "value": "RETRY(ERROR)",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1056,
+        224
+      ],
+      "id": "74f3d209-b628-47c7-bd40-224e5d575103",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        464,
+        432
+      ],
+      "id": "9e983926-7e6b-4b03-bf24-b7fa7a215b9f",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "18kt4Jcz73BMP9Dc",
+          "name": "Groq account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Web research ": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hacker News": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "6c06daaf-0f5a-458c-a5f4-7ae87e1f02ae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "39d4e714e6dae6666679f55463a27bf970d9bb35682c08004027a37a0b09b0d6"
+  },
+  "nodeGroups": [],
+  "id": "mvF9l8RUJeIdOJ2t",
+  "tags": []
+}
