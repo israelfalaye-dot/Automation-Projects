@@ -1,0 +1,239 @@
+{
+  "name": "Gmail agent",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 2,
+        "filters": {
+          "readStatus": "unread"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        208
+      ],
+      "id": "5a7fb664-8b2f-4204-9d1b-a219a8890463",
+      "name": "Check for unread messages",
+      "webhookId": "9b1719a9-2f39-464f-9230-24acabd604d5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "G7gJIj4fKTECVoeA",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        -16
+      ],
+      "id": "89dc5a83-822c-4362-925e-61f76ef1712a",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query}}",
+        "options": {
+          "systemMessage": "You must use a tool to get real information before \nresponding. Never answer from memory alone.\n\n\nYou are an email management agent. You have 3 tools:\n\n1. Check for unread messages — use when the user \nasks about their inbox, unread emails, or wants to \nread/reply to a specific email. Use this first to \nfind the email before replying.\n\n2. Reply message — use to reply to an existing email \nthread. Required info: which email to reply to, and \nthe reply content. Always show the user the drafted \nreply text and wait for confirmation before sending.\n\n3. Send a mail — use only to send a brand new email, \nnot a reply. Required info: recipient, subject, body. \nAlways show the user the draft before sending.\n\nRULES:\n- NEVER send or reply to an email without the user \n  explicitly confirming the content first.\n- If the user hasn't specified what the email should \n  say, ask before drafting.\n- Confirm every sent action in one short sentence.\n- No  [ ] \n- Always sign out when sending a mail\n\nMy name is KOLA"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        352,
+        -16
+      ],
+      "id": "b46d56d2-872d-458a-ae78-46876c848b17",
+      "name": "Gmail agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $fromAI('Message_ID', 'the id of the message you are trying to reply') }}",
+        "emailType": "text",
+        "message": "={{ $fromAI('Message', 'the message you want to send') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        208
+      ],
+      "id": "4b546bb3-eb3d-4103-8f19-d50d2bea0857",
+      "name": "Reply message",
+      "webhookId": "9b1719a9-2f39-464f-9230-24acabd604d5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "G7gJIj4fKTECVoeA",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI('E-mail', 'the e-mail address to send mail to') }}",
+        "subject": "={{ $fromAI('Subject', 'the subect of the mail you want to send') }}",
+        "emailType": "text",
+        "message": "={{ $fromAI('Message', 'the message you want to send') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        208
+      ],
+      "id": "e3220d7d-fddc-4c82-ac03-8b03a2c1792e",
+      "name": "Send a mail",
+      "webhookId": "9b1719a9-2f39-464f-9230-24acabd604d5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "G7gJIj4fKTECVoeA",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "477bc3a0-54ba-4344-b324-88e822ff981f",
+              "name": "Status",
+              "value": "RETRY",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        816,
+        112
+      ],
+      "id": "84f3a0fd-71f0-4eeb-aebd-26ef650adb7c",
+      "name": "ERROR"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        160,
+        208
+      ],
+      "id": "4cd8479d-c9b9-47d1-b380-94d20facd122",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "3eq1cvqSWrM68iJ7",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Check for unread messages": {
+      "ai_tool": [
+        [
+          {
+            "node": "Gmail agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Gmail agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply message": {
+      "ai_tool": [
+        [
+          {
+            "node": "Gmail agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a mail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Gmail agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail agent": {
+      "main": [
+        [],
+        [
+          {
+            "node": "ERROR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Gmail agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8cfa8614-7704-4cc1-bcad-ad126f90c026",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "39d4e714e6dae6666679f55463a27bf970d9bb35682c08004027a37a0b09b0d6"
+  },
+  "nodeGroups": [],
+  "id": "q5iZNojYsUucVXfZ",
+  "tags": []
+}
