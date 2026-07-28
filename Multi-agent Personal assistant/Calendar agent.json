@@ -1,0 +1,212 @@
+{
+  "name": "Cal agent sub-workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "israelfalaye@gmail.com",
+          "mode": "list",
+          "cachedResultName": "israelfalaye@gmail.com"
+        },
+        "start": "={{ $fromAI('starttime', 'the start time of the calendar event') }}",
+        "end": "={{ $fromAI('endtime','the end time of the event we are creating') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $fromAI('Attendees', 'the person or people we are trying to book a meeting with') }}"
+          ],
+          "summary": "={{ $fromAI(\"name\", \"the name of the event\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -336,
+        304
+      ],
+      "id": "5255480e-6fa2-47a1-ac34-30c426abec78",
+      "name": "Create a meeting",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "u42GYBlp7HpWQfAr",
+          "name": "Google Calendar OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "israelfalaye@gmail.com",
+          "mode": "list",
+          "cachedResultName": "israelfalaye@gmail.com"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -192,
+        320
+      ],
+      "id": "acd2b460-c7d5-44dd-9868-430777835711",
+      "name": "Check for meeting/event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "u42GYBlp7HpWQfAr",
+          "name": "Google Calendar OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -672,
+        96
+      ],
+      "id": "7d6f0859-a382-455a-9d6d-a40102289cfb",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.input}}",
+        "options": {
+          "systemMessage": "=You must use a tool to get real information before \nresponding. Never answer from memory alone.\n\nYou are a calendar management agent. You have 2 tools:\n\n1. Check for meeting/event — use this FIRST whenever \nthe user wants to create a meeting, to check if the \nrequested time slot is already taken. Also use this \nalone when the user just asks what's on their calendar \nor if they're free at a certain time.\n\n2. Create a meeting — use this to book a new event. \nRequired info: title, date (YYYY-MM-DD), start time \n(HH:MM), duration in minutes. If the user gives a \nrelative date like \"tomorrow\" or \"next Tuesday\", \ncalculate the exact date before calling this tool.\n\nRULES:\n- Always check for conflicts before creating a meeting.\n- If the slot is taken, tell the user and ask if they \n  want to pick a different time — do not create a \n  double-booked event.\n- If any required detail is missing, ask one short \n  question before calling create.\n- After successfully creating a meeting, confirm with \n  the title, date and time in one short sentence.\n  \nThe time is {{ $now.toFormat('yyyy-MM-dd')}}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -384,
+        96
+      ],
+      "id": "a9d12b90-3c8e-4e64-8cc8-503e11b2c991",
+      "name": "Calendar agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "118f59c9-8e68-48c5-8436-532e08594b6b",
+              "name": "Status",
+              "value": "Retry(error)",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        192
+      ],
+      "id": "72e53898-d0c7-4c98-96ff-bb5a4902665c",
+      "name": "ERROR"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        304
+      ],
+      "id": "5e068da8-6e05-4bdd-9eb1-611aec481309",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "18kt4Jcz73BMP9Dc",
+          "name": "Groq account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Create a meeting": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for meeting/event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Calendar agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar agent": {
+      "main": [
+        [],
+        [
+          {
+            "node": "ERROR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Calendar agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "5a007d94-93a2-4ff8-94a5-6fc27ce2bcb3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "39d4e714e6dae6666679f55463a27bf970d9bb35682c08004027a37a0b09b0d6"
+  },
+  "nodeGroups": [],
+  "id": "G8O6gUMlXS5uoLKc",
+  "tags": []
+}
