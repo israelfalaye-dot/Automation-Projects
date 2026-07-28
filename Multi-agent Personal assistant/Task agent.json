@@ -1,0 +1,226 @@
+{
+  "name": "Google task sub-workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "task": "MDU2MjM2ODQ4OTQ0ODA1NzYyNTk6MDow",
+        "title": "={{ $fromAI('Title', 'Name of the task') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        16,
+        112
+      ],
+      "id": "6d174dab-6943-45cf-ac11-741edfa5f307",
+      "name": "Create a task in Google Tasks",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "uidSBvOhLUmNZhtU",
+          "name": "Google Tasks OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "task": "MDU2MjM2ODQ4OTQ0ODA1NzYyNTk6MDow",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        160,
+        112
+      ],
+      "id": "6a3520b7-2809-442d-b78f-2991e435c20e",
+      "name": "Check for tasks in Google Tasks",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "uidSBvOhLUmNZhtU",
+          "name": "Google Tasks OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -336,
+        -112
+      ],
+      "id": "59a43c2f-ec69-420a-9682-5ca9344042fc",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "task": "MDU2MjM2ODQ4OTQ0ODA1NzYyNTk6MDow",
+        "taskId": "={{ $fromAI('Task_ID', ' ID of task you are trying to delete') }}"
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        304,
+        128
+      ],
+      "id": "8cbb2498-2f28-4065-a3e5-9cb26aca2ee4",
+      "name": "Delete a task in Google Tasks",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "uidSBvOhLUmNZhtU",
+          "name": "Google Tasks OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2e1b5577-ce83-4441-9e4b-2d75d7861e29",
+              "name": "Status",
+              "value": "RETRY(ERROR)",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        -16
+      ],
+      "id": "2f63c063-4c66-4e6d-88da-3d7435046321",
+      "name": "ERROR"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "You must use a tool to get real information before \nresponding. Never answer from memory alone.\n\nYou are a task management agent. You have 3 tools:\n\n1. Check for tasks in Google Tasks — use when the \nuser asks what's on their task list, or before \ndeleting a task to confirm it exists.\n\n2. Create a task in Google Tasks — use when the user \nwants to add, remember or track something. Required \ninfo: title, due date if mentioned. If no due date \nis given, create the task without one rather than \nguessing.\n\n3. Delete a task in Google Tasks — use when the user \nwants to remove, cancel or mark something as no \nlonger needed. Always check the task list first to \nfind the correct task before deleting.\n\nRULES:\n- Never delete a task without first confirming which \n  one matches the user's request.\n- If multiple tasks could match, list them and ask \n  the user to clarify.\n- Confirm every action in one short sentence."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        16,
+        -112
+      ],
+      "id": "11461bee-de8a-44ec-90c8-49c187709084",
+      "name": "Google task agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        96
+      ],
+      "id": "e46510cd-00c9-4263-9fa6-39cf3a8b78b8",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "18kt4Jcz73BMP9Dc",
+          "name": "Groq account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Create a task in Google Tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "Google task agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for tasks in Google Tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "Google task agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Google task agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a task in Google Tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "Google task agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google task agent": {
+      "main": [
+        [],
+        [
+          {
+            "node": "ERROR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Google task agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "3e2fbfe0-d03a-4cf0-a60d-b5a744c79b08",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "39d4e714e6dae6666679f55463a27bf970d9bb35682c08004027a37a0b09b0d6"
+  },
+  "nodeGroups": [],
+  "id": "VU79aAUoHAmsir1S",
+  "tags": []
+}
