@@ -205,7 +205,8 @@ Two Airtable Forms simplify information collection throughout the investment pro
 
 Founders complete this form after receiving the automated response to their investment inquiry. Submitted information is automatically stored in the **Startup Intake** table.
 
-<!-- Paste Startup Intake Form Screenshot -->
+<img width="1732" height="899" alt="image" src="https://github.com/user-attachments/assets/89a08d8f-b97d-4a0e-b481-61b97c3ad6f9" />
+
 
 ### Primary Contact Form
 
@@ -226,12 +227,53 @@ Two Airtable Automations eliminate repetitive manual follow-up.
 
 When a startup is moved into the **Opportunities** table, Airtable automatically sends an email inviting the founder to schedule a meeting to discuss the investment opportunity.
 
-<!-- Paste Automation Screenshot -->
+<img width="1085" height="890" alt="image" src="https://github.com/user-attachments/assets/fb164a1e-48d4-4962-8bb4-ba49edf0e4a4" />
+
 
 ### Annual Report Reminder
 
 One month before a company's annual reporting date, Airtable automatically emails the founder requesting their annual report.
 
-<!-- Paste Automation Screenshot -->
+<img width="845" height="882" alt="image" src="https://github.com/user-attachments/assets/2fc2e90d-cfad-4164-93fe-fa40b374b57a" />
+
+---
+
+# Tech Stack
+
+| Category | Technology |
+|-----------|------------|
+| Voice AI | Vapi |
+| Workflow Automation | n8n |
+| Database | Airtable |
+| AI Model | OpenAI |
+| Programming | JavaScript |
+| Integration | Webhooks |
+| Email | Gmail |
+
+---
+
+# Repository Structure
+
+```text
+AI-Investor-Portfolio-Assistant/
+├── README.md
+└── workflow.json
+```
+
+---
+
+## Future Improvements
+
+- Portfolio analytics dashboard
+- Investment performance summaries
+- Calendar integration for founder meetings
+- Automated investment memos
+- Multi-user authentication
+- Investor reporting dashboard
+
+---
+
+Built by **Kola**.
+
 
 
