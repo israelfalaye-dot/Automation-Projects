@@ -1,0 +1,708 @@
+{
+  "name": "Investor portfolio Management Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        1824,
+        2464
+      ],
+      "id": "a1102b6e-a8ad-48de-8e23-dd7af9aca532",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "G7gJIj4fKTECVoeA",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are an email assistant for an angel investor.\n\nYour only responsibility is to determine whether an incoming email is a genuine startup investment pitch.\n\nA startup investment pitch is any email where a founder, co-founder, CEO, startup representative, or someone acting on behalf of a startup is introducing a startup, requesting funding, seeking investment, sharing a pitch deck, or initiating an investment conversation.\n\nRespond with **YES** if the email includes any of the following:\n\n* Introducing a startup or company.\n* Seeking funding or investment.\n* Sharing a pitch deck.\n* Requesting a meeting regarding investment.\n* Asking the investor to review a startup.\n* Introducing a founder or startup for investment purposes.\n\nRespond with **NO** if the email is:\n\n* A newsletter.\n* Marketing or promotional content.\n* Spam.\n* A customer support request.\n* Personal correspondence.\n* A calendar invitation.\n* A job application.\n* A partnership request unrelated to investment.\n* An update from an existing portfolio company.\n* A general business conversation.\n* Anything that is not an initial startup investment opportunity.\n\nRules:\n\n* Your response must be exactly one word: **YES** or **NO**.\n* Do not provide explanations, reasoning, or any additional text.\n* If you are uncertain, classify the email as **NO**.\n",
+              "role": "model"
+            },
+            {
+              "content": "=Analyze the following incoming email.\n\nSubject:\n{{ $json.Subject }}\n\nFrom:\n{{ $json.From }}\n\nBody:\n{{ $json.snippet }}\n\nDetermine whether this email is a genuine startup investment pitch according to the instructions\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        2048,
+        2464
+      ],
+      "id": "bde96213-d20b-4b26-b379-9c6cba6a1f78",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1WFKcVykeUqrykwy",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3ca7b45e-406e-4cc0-b0c4-df9283c25cb2",
+              "leftValue": "={{ $json.content.parts[0].text }}",
+              "rightValue": "YES",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2400,
+        2464
+      ],
+      "id": "5e033334-1b36-4901-82df-f70cb4e59bf7",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2624,
+        2560
+      ],
+      "id": "9f05b0a0-c315-46c4-9172-631f75f409b1",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3072,
+        2368
+      ],
+      "id": "dbf186f5-40e4-44e9-a4dc-98e2769e6663",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Trigger').item.json.From }}",
+        "subject": "Investors Team - Fill this form",
+        "message": "=<!DOCTYPE html>\n\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Startup Submission</title>\n</head>\n\n<body style=\"margin:0;padding:40px 20px;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2937;\">\n\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n<tr>\n<td align=\"center\">\n\n<table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;\">\n\n<tr>\n<td style=\"padding:40px;\">\n\n<h1 style=\"margin:0 0 24px;font-size:28px;font-weight:700;color:#111827;\">\nThank you for reaching out.\n</h1>\n\n<p style=\"margin:0 0 18px;font-size:16px;line-height:1.7;\">\nHi,\n</p>\n\n<p style=\"margin:0 0 18px;font-size:16px;line-height:1.7;\">\nThank you for sharing your startup with us. We appreciate the opportunity to learn more about what you're building.\n</p>\n\n<p style=\"margin:0 0 18px;font-size:16px;line-height:1.7;\">\nTo ensure every opportunity is reviewed through a consistent process, we ask all founders to complete our startup intake form before we begin our evaluation.\n</p>\n\n<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin:32px 0;\">\n<tr>\n<td align=\"center\" bgcolor=\"#111827\" style=\"border-radius:8px;\">\n<a href=\"https://airtable.com/appa60rXDkgAnLbuW/pagOHFWvjKNTUNh9D/form\"\nstyle=\"display:inline-block;padding:15px 28px;color:#ffffff;text-decoration:none;font-size:16px;font-weight:600;\">\nComplete the Startup Intake Form\n</a>\n</td>\n</tr>\n</table>\n\n<p style=\"margin:0 0 18px;font-size:16px;line-height:1.7;\">\nIf the button above doesn't work, you can also use the link below:\n</p>\n\n<p style=\"margin:0 0 28px;font-size:15px;line-height:1.7;word-break:break-word;\">\n<a href=\"https://airtable.com/appa60rXDkgAnLbuW/pagOHFWvjKNTUNh9D/form\" style=\"color:#2563eb;text-decoration:none;\">\nhttps://airtable.com/appa60rXDkgAnLbuW/pagOHFWvjKNTUNh9D/form\n</a>\n</p>\n\n<div style=\"padding:18px;background:#f9fafb;border-left:4px solid #111827;border-radius:6px;margin-bottom:28px;\">\n<p style=\"margin:0;font-size:15px;line-height:1.7;\">\nEvery submission is reviewed carefully. If your startup aligns with our investment focus, we'll be in touch regarding the next steps.\n</p>\n</div>\n\n<p style=\"margin:0;font-size:16px;line-height:1.7;\">\nWe appreciate your time and look forward to learning more about your company.\n</p>\n\n<p style=\"margin:32px 0 0;font-size:16px;line-height:1.7;\">\nBest regards,<br>\n<strong>The Investment Team</strong>\n</p>\n\n</td>\n</tr>\n\n</table>\n\n</td>\n</tr>\n</table>\n\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2624,
+        2368
+      ],
+      "id": "69c15fc4-28c5-455f-a214-8d8a22be7718",
+      "name": "Send Form Link",
+      "webhookId": "4d6efea2-ef59-4c33-979f-3ca19ad97ba5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "G7gJIj4fKTECVoeA",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "6dec1a39-0ace-4e05-9591-48d5fd257ab3",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1808,
+        1920
+      ],
+      "id": "29815435-02b2-4ae5-80af-66047595181a",
+      "name": "Webhook",
+      "webhookId": "6dec1a39-0ace-4e05-9591-48d5fd257ab3"
+    },
+    {
+      "parameters": {
+        "options": {
+          "enableStreaming": false
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3072,
+        1920
+      ],
+      "id": "26e8ad6b-b0da-4594-b379-41796eb8d210",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_3741078394952798662"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2848,
+        2368
+      ],
+      "id": "33ae4535-91b5-4be2-9f31-4c6b37b1d1ae",
+      "name": "Add label to message",
+      "webhookId": "4d6efea2-ef59-4c33-979f-3ca19ad97ba5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "G7gJIj4fKTECVoeA",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "value": "appa60rXDkgAnLbuW",
+          "mode": "list",
+          "cachedResultName": "Investment database",
+          "cachedResultUrl": "https://airtable.com/appa60rXDkgAnLbuW"
+        },
+        "table": {
+          "__rl": true,
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Table', ``, 'string') }}",
+          "mode": "id"
+        },
+        "id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Record_ID', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.2,
+      "position": [
+        2384,
+        2048
+      ],
+      "id": "61d79eb4-5df4-4ac9-8c30-246b45bfa962",
+      "name": "Get a record in Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "H9VK35oDia90ukty",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appa60rXDkgAnLbuW",
+          "mode": "list",
+          "cachedResultName": "Investment database",
+          "cachedResultUrl": "https://airtable.com/appa60rXDkgAnLbuW"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl3Gmbcbv3o0VFi9",
+          "mode": "list",
+          "cachedResultName": "My Companies",
+          "cachedResultUrl": "https://airtable.com/appa60rXDkgAnLbuW/tbl3Gmbcbv3o0VFi9"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Annual report date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Annual_report_date', ``, 'string') }}",
+            "id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('id__using_to_match_', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Founder",
+              "displayName": "Founder",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Primary Contacts(Investments)",
+              "displayName": "Primary Contacts(Investments)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email/Phone no. (from Primary Contacts(Investments))",
+              "displayName": "Email/Phone no. (from Primary Contacts(Investments))",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Linkedin Profile Link",
+              "displayName": "Linkedin Profile Link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Amount Invested",
+              "displayName": "Amount Invested",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Stake(%)",
+              "displayName": "Stake(%)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Stage",
+              "displayName": "Stage",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Target Customers",
+              "displayName": "Target Customers",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Annual report date",
+              "displayName": "Annual report date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.2,
+      "position": [
+        2512,
+        2048
+      ],
+      "id": "8e5e8fd0-de72-4aa1-b3a5-5c909e286519",
+      "name": "Create or update a record in Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "H9VK35oDia90ukty",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appa60rXDkgAnLbuW",
+          "mode": "list",
+          "cachedResultName": "Investment database",
+          "cachedResultUrl": "https://airtable.com/appa60rXDkgAnLbuW"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Table', ``, 'string') }}"
+        },
+        "filterByFormula": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Filter_By_Formula', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.2,
+      "position": [
+        2640,
+        2048
+      ],
+      "id": "c31da269-4f60-469a-a4a6-2a88301487c9",
+      "name": "Search records in Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "H9VK35oDia90ukty",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Webhook').item.json.headers.tool }}\n{{ $json.nextReportDate }}\n{{ $json.startupName }}\n{{ $json.companyName }}\n{{ $json.tableName }}",
+        "options": {
+          "systemMessage": "You are an Airtable Management Assistant for an angel investor.\n\nYour responsibility is to help users retrieve, search, and update records stored in Airtable using the available Airtable tools.\n\nYou have access to the following Airtable tools:\n\n1. Get Records\n   - Use this tool when the user wants to retrieve all records from a specific table.\n\n2. Search Records\n   - Use this tool when the user is looking for a specific record within a table.\n   - Search only within the relevant table based on the user's request.\n\n3. Create or Update Record\n   - Use this tool when the user wants to update an existing record.\n   - This tool will primarily be used to update the Annual Reporting Date for an investment, but it may also be used for other record updates when requested.\n\n----------------------------------------\nTABLE IDS\n----------------------------------------\n\nInvestment Table\nID: tbl3Gmbcbv3o0VFi9\n\nStartup Intake Table\nID: tblEqAa306pwyYkIH\n\nPrimary Contacts Table\nID: tblGtDeWqZP3iIuGE\n\nOpportunity Table\nID: tblVmRrO24SW4SrVP\n\n----------------------------------------\nIMPORTANT\n----------------------------------------\n\nNever search for a table by its name.\n\nAlways use the corresponding Table ID listed above whenever an Airtable tool requires a table identifier.\n\nSelect the correct table based on the user's request and use its designated ID.\n\n----------------------------------------\nWHEN TO USE EACH TABLE\n----------------------------------------\n\n----------------------------------------\nWORKFLOW\n----------------------------------------\nIf the tool called is Record-tool, the table name  will be provided. So get the records from that table but if the user mentions a particular company, get the details about that particular company\n\nIf the tool is Date-tool, the next report date & company/startup name will be provided, so change the next report date for that specific company/ startup on airtable\n----------------------------------------\nGENERAL RULES\n----------------------------------------\n\n- Always choose the correct Airtable tool for the user's request.\n- Always use the Table ID instead of the table name.\n- Do not invent or assume information that does not exist in Airtable.\n- If a requested record cannot be found, clearly inform the user.\n- Keep responses concise, professional, and accurate.\nVOICE ASSISTANT RULES\n\n- Keep responses brief and conversational.\n- Do not read Airtable IDs aloud.\n- Do not mention internal tools or table IDs to the user.\n- After retrieving information, summarize it naturally \ninstead of listing raw Airtable fields unless the user explicitly asks for them.\n\n\nWhen returning information from Airtable, always format the response as clear, conversational plain text. Do not use Markdown tables, bullet points, JSON, or code blocks. Organize the information into natural sentences that are easy to read aloud. This assistant is voice-first, so responses should sound like a human speaking."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2384,
+        1808
+      ],
+      "id": "2604b0be-6993-4c42-89be-08f0f046f8a2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body ?? {};\n\n// Production payload\nconst args =\n\tbody.message?.toolCalls?.[0]?.function?.arguments ??\n\tbody;\n\n// Find keys dynamically (handles weird spacing/casing)\nconst companyKey = Object.keys(args).find(\n\tk => k.toLowerCase().includes(\"company\")\n);\n\nconst startupKey = Object.keys(args).find(\n\tk => k.toLowerCase().includes(\"startup\")\n);\n\nconst tableKey = Object.keys(args).find(\n\tk => k.toLowerCase().includes(\"table\")\n);\n\nconst reportKey = Object.keys(args).find(\n\tk =>\n\t\tk.toLowerCase().includes(\"report\") ||\n\t\tk.toLowerCase().includes(\"date\")\n);\n\nreturn [\n\t{\n\t\tjson: {\n\t\t\ttableName: tableKey ? args[tableKey] : \"\",\n\t\t\tcompanyName: companyKey ? args[companyKey] : \"\",\n\t\t\tstartupName: startupKey ? args[startupKey] : \"\",\n\t\t\tnextReportDate: reportKey ? args[reportKey] : \"\",\n\t\t},\n\t},\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2032,
+        1920
+      ],
+      "id": "6cae3f43-7661-4760-8331-47575e150d49",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-v4-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        2256,
+        2048
+      ],
+      "id": "bed1ff68-c0d2-4b12-9f19-84732fbe43da",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "db03BRAztKlMqgeU",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const webhookData = $('Webhook').item.json;\n\n// Handle both parsed (body.message...) and unwrapped (message... directly) payloads\nconst message = webhookData.body?.message || webhookData.message;\nconst toolCallId = message.toolCalls[0].id;\n\nconst output = $json.output;\n\nreturn {\n  json: {\n    results: [\n      {\n        toolCallId: toolCallId,\n        result: output\n      }\n    ]\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2848,
+        1920
+      ],
+      "id": "02926fd0-5587-494d-9f82-ff04337e0330",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "content": "CONNECTED TO VAPI\n\n- Get records\n- Search each table\n- Update Records",
+        "height": 512,
+        "width": 1536
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1760,
+        1680
+      ],
+      "typeVersion": 1,
+      "id": "c6230f8c-75d8-4c2d-9223-cd1dc00727a0",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Mail Labelling\n\n- Checks if each new mail has to do with someone pitching a startup\n- (if YES) Sends them the intake form link and adds a STARTUP label\n- (if NO) Does Nothing",
+        "height": 432,
+        "width": 1504,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1776,
+        2272
+      ],
+      "typeVersion": 1,
+      "id": "05544726-71e3-4c47-ab53-34ca504e93a8",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send Form Link",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Form Link": {
+      "main": [
+        [
+          {
+            "node": "Add label to message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label to message": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a record in Airtable": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record in Airtable": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records in Airtable": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "86fd081f-d0bd-4522-943e-9541b395ec75",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "39d4e714e6dae6666679f55463a27bf970d9bb35682c08004027a37a0b09b0d6"
+  },
+  "nodeGroups": [],
+  "id": "y1pj9Fk2kgD1zniF",
+  "tags": []
+}
