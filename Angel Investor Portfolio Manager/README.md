@@ -1,7 +1,9 @@
 # AI Investor Portfolio Assistant
 
 An AI-powered investment management system that combines **Vapi**, **n8n**, and **Airtable** to help angel investors manage their startup pipeline, portfolio companies, and annual reporting process using natural language voice commands and intelligent automation.
-<!-- Paste Airtable Base Screenshot -->
+
+<img width="1592" height="766" alt="image" src="https://github.com/user-attachments/assets/f6593c52-b33f-4e0d-8910-4799d8f41177" />
+
 ---
 
 # Overview
